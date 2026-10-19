@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Models;
+using WebApi.Repositories;
 
 namespace WebApi.Controllers
 {
@@ -13,16 +14,20 @@ namespace WebApi.Controllers
 
 
         [HttpPost]
-        public ActionResult<Book> Create(Book book)
+        public ActionResult<Book> CreateBook(Book book)
         {
             book.Id = _nextId;
             _nextId++;
             _books.Add(book);
+            LogsRepository.AddLogs(0, "Book created");
+
             return Ok(book);
+
+
         }
 
         [HttpGet]
-        public ActionResult <List<Book>> GetAll()
+        public ActionResult<List<Book>> GetAllBooks()
         {
             try
             {
@@ -36,7 +41,7 @@ namespace WebApi.Controllers
 
 
         [HttpGet("{id}")]
-        public ActionResult <Book> GetById(int id)
+        public ActionResult<Book> GetByIdBook(int id)
         {
             try
             {
@@ -70,7 +75,7 @@ namespace WebApi.Controllers
 
 
         [HttpPut("{id}")]
-        public ActionResult<Book> UpdateById(int id, Book book)
+        public ActionResult<Book> UpdateBookById(int id, Book book)
         {
             try
             {
@@ -90,7 +95,7 @@ namespace WebApi.Controllers
                 existing.Name = book.Name;
                 existing.GenreId = book.GenreId;
 
-
+                LogsRepository.AddLogs(0, "Book updated");
 
                 return Ok(existing);
             }
@@ -99,6 +104,8 @@ namespace WebApi.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+
 
 
 
@@ -118,6 +125,8 @@ namespace WebApi.Controllers
 
                 }
                 _books.Remove(book);
+                LogsRepository.AddLogs(0, "Book deleted");
+
 
                 return Ok();
             }
@@ -126,5 +135,29 @@ namespace WebApi.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+        [HttpGet("[action]")]
+
+        public ActionResult<List<Book>> SearchBooks(string name, int page = 1, int count = 10)
+        {
+
+            var results = _books;
+
+            if (!string.IsNullOrEmpty(name))
+            {
+
+                results = results.Where(b => b.Name.Contains(name, StringComparison.OrdinalIgnoreCase)).ToList();
+
+            }
+
+            results = results.Skip((page - 1) * count).Take(count).ToList();
+
+            return Ok(results);
+
+        }
     }
+
+
+
+
 }

@@ -1,15 +1,15 @@
-﻿namespace WebApi.Models
+﻿using System;
+using System.Collections.Generic;
+
+namespace WebApi.Models;
+
+public partial class Log
 {
-    public class Log
-    {
+    public int Id { get; set; }
 
-        public int Id { get; set; }
+    public DateTime TimeStamp { get; set; }
 
-        public DateTime TimeStamp { get; set; }
+    public int Level { get; set; }
 
-        public int Level { get; set; }
-
-
-        public string Message { get; set; } = null;
-    }
+    public string Message { get; set; } = null!;
 }
