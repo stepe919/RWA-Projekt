@@ -67,11 +67,11 @@ builder.Services
     });
 
 
-/*builder.Services.AddDbContext<RwaLibraryLearnContext>(options =>
+builder.Services.AddDbContext<RwaLibraryLearnContext>(options =>
 {
 
-    options.UseSqlServer()
-});*/
+    options.UseSqlServer("name=ConnectionStrings:LibrararyConStr");
+});
 
 var app = builder.Build();
 

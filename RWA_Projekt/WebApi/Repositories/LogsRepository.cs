@@ -16,7 +16,7 @@ namespace WebApi.Repositories
             log.Id = _nextId;
             log.Level = level;
             log.Message = message;
-            log.TimeStamp = DateTime.Now;
+            log.Timestamp = DateTime.Now;
             _nextId++;
             LogsItems.Add(log);
             

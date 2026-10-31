@@ -26,5 +26,8 @@ namespace WebApi.Dtos
 
         [Phone(ErrorMessage = "Provide a correct phone number")]
         public string Phone { get; set; }
+
+
+       
     }
 }

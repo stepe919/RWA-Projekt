@@ -1,10 +1,10 @@
-﻿using WebApi.Dtos;
-
+﻿
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Models;
 using WebApi.Security;
+using WebApi.Dtos;
 
 namespace WebApi.Controllers
 {
@@ -56,13 +56,15 @@ namespace WebApi.Controllers
                 // Create user from DTO and hashed password
                 var user = new User
                 {
-                    Id = userDto.Id,
+                   
                     Username = userDto.Username,
                     PwdHash = b64hash,
                     PwdSalt = b64salt,
                     FirstName = userDto.FirstName,
                     LastName = userDto.LastName,
                     Email = userDto.Email,
+                    Phone = userDto.Phone,
+                    IsAdmin = false
                
                 };
 

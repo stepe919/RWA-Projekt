@@ -28,8 +28,7 @@ public partial class RwaLibraryLearnContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("server=DESKTOP-1JOLDRF\\JAMAGARAC;Database=RwaLibraryLearn;User Id=sas;Password=SQL;TrustServerCertificate=True;MultipleActiveResultSets=true");
+        => optionsBuilder.UseSqlServer("name=ConnectionStrings:LibraryConnStr");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -87,6 +86,9 @@ public partial class RwaLibraryLearnContext : DbContext
             entity.ToTable("User");
 
             entity.Property(e => e.Email).HasMaxLength(256);
+            entity.Property(e => e.FirstName).HasMaxLength(256);
+            entity.Property(e => e.LastName).HasMaxLength(256);
+            entity.Property(e => e.Phone).HasMaxLength(256);
             entity.Property(e => e.PwdHash).HasMaxLength(256);
             entity.Property(e => e.PwdSalt).HasMaxLength(256);
             entity.Property(e => e.Username).HasMaxLength(256);

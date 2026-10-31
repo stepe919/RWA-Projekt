@@ -7,7 +7,7 @@ public partial class Log
 {
     public int Id { get; set; }
 
-    public DateTime TimeStamp { get; set; }
+    public DateTime Timestamp { get; set; }
 
     public int Level { get; set; }
 
