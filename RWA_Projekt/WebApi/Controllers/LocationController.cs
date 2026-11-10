@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using WebApi.Repositories;
 namespace WebApi.Controllers
 {
@@ -13,6 +14,7 @@ namespace WebApi.Controllers
         private static int _nextId = 1;
 
         [HttpPost]
+        [Authorize]
         public ActionResult<Location> CreateLocation(Location locations)
         {
            locations.Id = _nextId;
@@ -27,6 +29,7 @@ namespace WebApi.Controllers
 
 
         [HttpGet]
+ 
         public ActionResult<List<Location>> GetAllLocations()
         {
             try
@@ -40,6 +43,7 @@ namespace WebApi.Controllers
         }
 
         [HttpGet("{id}")]
+  
         public ActionResult<Location> GetByIdLocation(int id)
         {
             try
@@ -70,6 +74,7 @@ namespace WebApi.Controllers
 
 
         [HttpPut("{id}")]
+        [Authorize]
         public ActionResult<Location> UpdateLocationkById(int id, Location location)
         {
             try
@@ -105,6 +110,7 @@ namespace WebApi.Controllers
 
 
         [HttpDelete("{id}")]
+        [Authorize]
         public ActionResult RemoveLocation(int id)
         {
             try

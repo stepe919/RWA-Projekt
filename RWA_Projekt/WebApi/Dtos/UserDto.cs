@@ -15,17 +15,17 @@ namespace WebApi.Dtos
 
         [Required(ErrorMessage = "First name is required")]
         [StringLength(50, MinimumLength = 2, ErrorMessage = "First name should be between 2 and 50 characters long")]
-        public string FirstName { get; set; }
+        public string ?FirstName { get; set; }
 
         [Required(ErrorMessage = "Last name is required")]
         [StringLength(50, MinimumLength = 2, ErrorMessage = "Last name should be between 2 and 50 characters long")]
-        public string LastName { get; set; }
+        public string ?LastName { get; set; }
 
         [EmailAddress(ErrorMessage = "Provide a correct e-mail address")]
-        public string Email { get; set; }
+        public string ?Email { get; set; }
 
         [Phone(ErrorMessage = "Provide a correct phone number")]
-        public string Phone { get; set; }
+        public string ?Phone { get; set; }
 
 
        

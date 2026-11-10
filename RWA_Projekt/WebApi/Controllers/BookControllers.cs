@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using WebApi.Repositories;
+using WebApi.Dtos;
 
 namespace WebApi.Controllers
 {
@@ -9,29 +11,57 @@ namespace WebApi.Controllers
     [ApiController]
     public class BookController : ControllerBase
     {
-        private static List<Book> _books = new List<Book>();
-        private static int _nextId = 1;
 
 
-        [HttpPost]
-        public ActionResult<Book> CreateBook(Book book)
+        private readonly RwaLibraryLearnContext _context;
+
+
+        public BookController(RwaLibraryLearnContext context)
         {
-            book.Id = _nextId;
-            _nextId++;
-            _books.Add(book);
-            LogsRepository.AddLogs(0, "Book created");
 
-            return Ok(book);
-
-
+            _context = context;
         }
 
+        [HttpPost]
+        [Authorize]
+        public ActionResult<BookDto> CreateBook(BookDto bookDto)
+        {
+            try
+            {
+                var book = new Book
+                {
+                    Name = bookDto.Name,
+                    Author = bookDto.Author,
+                    Isbn = bookDto.Isbn,
+                    Description = bookDto.Description,
+                    PublishedYear = bookDto.PublishedYear,
+                    GenreId = bookDto.GenreId
+                };
+
+                _context.Add(book);
+                _context.SaveChanges();
+
+                LogsRepository.AddLogs(0, "Book created");
+
+                bookDto.Id = book.Id;
+
+                return Ok(bookDto);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+
+
         [HttpGet]
+      
         public ActionResult<List<Book>> GetAllBooks()
         {
             try
             {
-                return Ok(_books);
+                return Ok(_context.Books.ToList());
             }
             catch (Exception)
             {
@@ -41,11 +71,12 @@ namespace WebApi.Controllers
 
 
         [HttpGet("{id}")]
+    
         public ActionResult<Book> GetByIdBook(int id)
         {
             try
             {
-                var book = _books.FirstOrDefault(b => b.Id == id);
+                var book = _context.Books.FirstOrDefault(b => b.Id == id);
 
                 if (book == null)
                 {
@@ -75,11 +106,12 @@ namespace WebApi.Controllers
 
 
         [HttpPut("{id}")]
-        public ActionResult<Book> UpdateBookById(int id, Book book)
+        [Authorize]
+        public ActionResult<Book> UpdateBookById(int id, BookDto bookDto)
         {
             try
             {
-                var existing = _books.FirstOrDefault(b => b.Id == id);
+                var existing = _context.Books.FirstOrDefault(b => b.Id == id);
 
                 if (existing == null)
                 {
@@ -88,15 +120,16 @@ namespace WebApi.Controllers
                     return NotFound($"Nema knjige s id-em {id}");
                 }
 
-
-                existing.Author = book.Author;
-                existing.Description = book.Description;
-                existing.PublishedYear = book.PublishedYear;
-                existing.Name = book.Name;
-                existing.GenreId = book.GenreId;
+                existing.Name = bookDto.Name;
+                existing.Author = bookDto.Author;
+                existing.Description = bookDto.Description;
+                existing.PublishedYear = bookDto.PublishedYear;
+                existing.Isbn = bookDto.Isbn;
+                existing.GenreId = bookDto.GenreId;
+                
+                _context.SaveChanges();
 
                 LogsRepository.AddLogs(0, "Book updated");
-
                 return Ok(existing);
             }
             catch (Exception ex)
@@ -111,12 +144,13 @@ namespace WebApi.Controllers
 
 
         [HttpDelete("{id}")]
+        [Authorize]
         public ActionResult RemoveBooks(int id)
         {
             try
             {
 
-                var book = _books.FirstOrDefault(b => b.Id == id);
+                var book = _context.Books.FirstOrDefault(b => b.Id == id);
                 if (book == null)
                 {
 
@@ -124,7 +158,10 @@ namespace WebApi.Controllers
                     return NotFound($"Ne postoji knjiga s id-em {id}");
 
                 }
-                _books.Remove(book);
+                _context.Remove(book);
+
+                _context.SaveChanges();
+
                 LogsRepository.AddLogs(0, "Book deleted");
 
 
@@ -137,23 +174,45 @@ namespace WebApi.Controllers
         }
 
         [HttpGet("[action]")]
+  
 
-        public ActionResult<List<Book>> SearchBooks(string name, int page = 1, int count = 10)
+        public ActionResult<List<Book>> SearchBooks(string? name, int page = 1, int count = 10)
         {
 
-            var results = _books;
+            IQueryable<Book> results = _context.Books;
 
-            if (!string.IsNullOrEmpty(name))
+
+         
+
+            try
             {
 
-                results = results.Where(b => b.Name.Contains(name, StringComparison.OrdinalIgnoreCase)).ToList();
 
+
+
+                if (!string.IsNullOrEmpty(name))
+                {
+
+                    results = results.Where(b => b.Name.Contains(name));
+                }
+
+                results = results.OrderBy(b => b.Name);
+
+                results = results.Skip((page - 1) * count).Take(count);
+
+                return Ok(results.ToList());
             }
 
-            results = results.Skip((page - 1) * count).Take(count).ToList();
 
-            return Ok(results);
+            catch (Exception ex)
+            {
 
+               
+
+
+
+                    return StatusCode(500,ex.Message);
+            }
         }
     }
 

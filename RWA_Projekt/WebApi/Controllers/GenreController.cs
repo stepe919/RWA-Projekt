@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+
 using WebApi.Models;
 using WebApi.Repositories;
 namespace WebApi.Controllers
@@ -9,29 +11,53 @@ namespace WebApi.Controllers
     [ApiController]
     public class GenreController :ControllerBase
     {
-        private static List<Genre> _genres = new List<Genre>();
-        private static int _nextId = 1;
+    
+        private readonly RwaLibraryLearnContext _context;
+
+
+        public GenreController(RwaLibraryLearnContext context)
+        {
+           
+            _context = context;
+        }
+
 
         [HttpPost]
-        public ActionResult<Genre> CreateBook(Genre genres)
+        [Authorize]
+        public ActionResult<Genre> CreateGenre(Genre genre )
         {
-            genres.Id = _nextId;
-            _nextId++;
-            _genres.Add(genres);
-            LogsRepository.AddLogs(0, "Book created");
+          
+            _context.Add(genre);
+           
 
-            return Ok(genres);
 
+            try
+            {
+                _context.SaveChanges();
+                LogsRepository.AddLogs(0, "Genre created");
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, ex.Message);
+            }
+
+
+            return Ok(genre);
+
+
+          
 
         }
 
 
         [HttpGet]
-        public ActionResult<List<Book>> GetAllGenres()
+    
+        public ActionResult<List<Genre>> GetAllGenres()
         {
             try
             {
-                return Ok(_genres);
+                return Ok(_context.Genres.ToList());
             }
             catch (Exception)
             {
@@ -40,17 +66,18 @@ namespace WebApi.Controllers
         }
 
         [HttpGet("{id}")]
+   
         public ActionResult<Genre> GetByIdGenre(int id)
         {
             try
             {
-                var book = _genres.FirstOrDefault(b => b.Id == id);
+                var genre = _context.Genres.FirstOrDefault(b => b.Id == id);
 
-                if (book == null)
+                if (genre == null)
                 {
 
 
-                    return NotFound($"Nema knjige s id-em {id}");
+                    return NotFound($"No genre with id {id}");
                 }
 
 
@@ -58,7 +85,70 @@ namespace WebApi.Controllers
 
 
 
-                return Ok(_genres);
+                return Ok(genre);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+
+
+
+        [HttpDelete("{id}")]
+        [Authorize]
+        public ActionResult RemoveGenres(int id)
+        {
+            try
+            {
+
+                var genre = _context.Genres.FirstOrDefault(b => b.Id == id);
+                if ( genre == null)
+                {
+
+
+                    return NotFound($"Ne postoji genre s id-em {id}");
+
+                }
+                _context.Remove(genre);
+                _context.SaveChanges();
+                LogsRepository.AddLogs(0, "Genre deleted");
+
+
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+
+        [HttpPut("{id}")]
+        [Authorize]
+        public ActionResult <Genre> UpdateBookById(int id, Genre genre)
+        {
+            try
+            {
+                var existing = _context.Genres.FirstOrDefault(b => b.Id == id);
+
+                if (existing == null)
+                {
+
+
+                    return NotFound($"Nema genre-a s id-em {id}");
+                }
+
+
+                existing.Name = genre.Name;
+                existing.Description = genre.Description;
+
+                _context.SaveChanges();
+                LogsRepository.AddLogs(0, "Genre updated");
+
+                return Ok(existing);
             }
             catch (Exception ex)
             {
