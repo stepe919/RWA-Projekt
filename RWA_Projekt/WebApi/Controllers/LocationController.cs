@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using WebApi.Dtos;
 using WebApi.Models;
-using Microsoft.AspNetCore.Authorization;
 using WebApi.Repositories;
 namespace WebApi.Controllers
 {
@@ -10,22 +11,45 @@ namespace WebApi.Controllers
     [ApiController]
     public class LocationController : ControllerBase
     {
-        private static List<Location> _Locations = new List<Location>();
-        private static int _nextId = 1;
+
+        private readonly RwaLibraryLearnContext _context;
+
+
+        public LocationController(RwaLibraryLearnContext context)
+        {
+
+            _context = context;
+        }
+
 
         [HttpPost]
         [Authorize]
-        public ActionResult<Location> CreateLocation(Location locations)
+        public ActionResult<Location> CreateLocation(Location location)
         {
-           locations.Id = _nextId;
-            _nextId++;
-            _Locations.Add(locations);
-            LogsRepository.AddLogs(0, "Lokacija kreirana");
+            try
+            {
+                var _location = new Location
+                {
+                    Name = location.Name,
+                    Address = location.Address
+                 
+                };
 
-            return Ok(locations);
+                _context.Add(_location);
+                _context.SaveChanges();
 
+                LogsRepository.AddLogs(0, "Location created");
 
+                location.Id = _location.Id;
+
+                return Ok(_location);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
+
 
 
         [HttpGet]
@@ -34,7 +58,7 @@ namespace WebApi.Controllers
         {
             try
             {
-                return Ok(_Locations);
+                return Ok(_context.Locations.ToList());
             }
             catch (Exception)
             {
@@ -48,7 +72,7 @@ namespace WebApi.Controllers
         {
             try
             {
-                var location = _Locations.FirstOrDefault(b => b.Id == id);
+                var location = _context.Locations.FirstOrDefault(b => b.Id == id);
 
                 if (location == null)
                 {
@@ -75,11 +99,11 @@ namespace WebApi.Controllers
 
         [HttpPut("{id}")]
         [Authorize]
-        public ActionResult<Location> UpdateLocationkById(int id, Location location)
+        public ActionResult<Location> UpdateLocationById(int id, Location location)
         {
             try
             {
-                var existing = _Locations.FirstOrDefault(b => b.Id == id);
+                var existing = _context.Locations.FirstOrDefault(b => b.Id == id);
 
                 if (existing == null)
                 {
@@ -92,7 +116,8 @@ namespace WebApi.Controllers
                 existing.Name = location.Name;
                 existing.Address = location.Address;
 
-                
+
+                _context.SaveChanges();
 
                 LogsRepository.AddLogs(0, "Location updated");
 
@@ -116,7 +141,7 @@ namespace WebApi.Controllers
             try
             {
 
-                var location = _Locations.FirstOrDefault(b => b.Id == id);
+                var location = _context.Locations.FirstOrDefault(b => b.Id == id);
                 if (location == null)
                 {
 
@@ -124,7 +149,9 @@ namespace WebApi.Controllers
                     return NotFound($"Ne postoji lokacija s id-em {id}");
 
                 }
-                _Locations.Remove(location);
+                _context.Remove(location);
+                _context.SaveChanges();
+
                 LogsRepository.AddLogs(0, "Lokacija obrisana");
 
 

@@ -103,6 +103,11 @@ namespace WebApi.Controllers
             try
             {
 
+                if (!_context.Books.Any(g => g.Id == id.Gendre))
+                {
+                    return BadRequest($"Žanr s Id-em {bookDto.GenreId} ne postoji");
+                }
+
                 var genre = _context.Genres.FirstOrDefault(b => b.Id == id);
                 if ( genre == null)
                 {
