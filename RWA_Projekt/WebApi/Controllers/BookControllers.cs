@@ -120,12 +120,24 @@ namespace WebApi.Controllers
             {
                 var existing = _context.Books.FirstOrDefault(b => b.Id == id);
 
+
+             
+
+
+
                 if (existing == null)
                 {
 
 
                     return NotFound($"Nema knjige s id-em {id}");
                 }
+
+
+                if (!_context.Genres.Any(g => g.Id == bookDto.GenreId))
+                {
+                    return BadRequest($"Genre with id {bookDto.GenreId} does not exist");
+                }
+
 
                 existing.Name = bookDto.Name;
                 existing.Author = bookDto.Author;

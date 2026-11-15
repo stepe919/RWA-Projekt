@@ -71,7 +71,7 @@ builder.Services
 builder.Services.AddDbContext<RwaLibraryLearnContext>(options =>
 {
 
-    options.UseSqlServer("name=ConnectionStrings:LibrararyConStr");
+    options.UseSqlServer("name=ConnectionStrings:LibraryConnStr");
 });
 
 var app = builder.Build();

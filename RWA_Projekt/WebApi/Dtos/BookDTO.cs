@@ -10,8 +10,9 @@ namespace WebApi.Dtos
         [StringLength(256)]
         public string Name { get; set; } = null!;
 
+        [Required(ErrorMessage = "Author is required")]
         [StringLength(256)]
-        public string? Author { get; set; }
+        public string? Author { get; set; } = null!;
 
         [StringLength(256)]
         public string? Isbn { get; set; }
