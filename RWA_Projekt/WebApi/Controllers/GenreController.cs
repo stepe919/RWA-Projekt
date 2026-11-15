@@ -34,7 +34,7 @@ namespace WebApi.Controllers
             try
             {
                 _context.SaveChanges();
-                LogsRepository.AddLogs(0, "Genre created");
+                LogsRepository.AddLogs(_context, 0, "Genre created");
             }
             catch (Exception ex)
             {
@@ -103,9 +103,9 @@ namespace WebApi.Controllers
             try
             {
 
-                if (!_context.Books.Any(g => g.Id == id.Gendre))
+                if (_context.Books.Any(b => b.GenreId == id))
                 {
-                    return BadRequest($"Žanr s Id-em {bookDto.GenreId} ne postoji");
+                    return BadRequest($"Žanr ima knjige s tim ide-em pa se ne smije obrisati");
                 }
 
                 var genre = _context.Genres.FirstOrDefault(b => b.Id == id);
@@ -118,7 +118,7 @@ namespace WebApi.Controllers
                 }
                 _context.Remove(genre);
                 _context.SaveChanges();
-                LogsRepository.AddLogs(0, "Genre deleted");
+                LogsRepository.AddLogs(_context, 0, "Genre deleted");
 
 
 
@@ -151,7 +151,7 @@ namespace WebApi.Controllers
                 existing.Description = genre.Description;
 
                 _context.SaveChanges();
-                LogsRepository.AddLogs(0, "Genre updated");
+                LogsRepository.AddLogs(_context, 0, "Genre updated");
 
                 return Ok(existing);
             }

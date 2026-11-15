@@ -38,7 +38,7 @@ namespace WebApi.Controllers
                 _context.Add(_location);
                 _context.SaveChanges();
 
-                LogsRepository.AddLogs(0, "Location created");
+                LogsRepository.AddLogs(_context, 0, "Location created");
 
                 location.Id = _location.Id;
 
@@ -119,7 +119,7 @@ namespace WebApi.Controllers
 
                 _context.SaveChanges();
 
-                LogsRepository.AddLogs(0, "Location updated");
+                LogsRepository.AddLogs(_context, 0, "Location updated");
 
                 return Ok(existing);
             }
@@ -152,7 +152,7 @@ namespace WebApi.Controllers
                 _context.Remove(location);
                 _context.SaveChanges();
 
-                LogsRepository.AddLogs(0, "Lokacija obrisana");
+                LogsRepository.AddLogs(_context, 0, "Lokacija obrisana");
 
 
                 return Ok();

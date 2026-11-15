@@ -44,9 +44,11 @@ namespace WebApi.Controllers
                 };
 
                 _context.Add(book);
+
+
                 _context.SaveChanges();
 
-                LogsRepository.AddLogs(0, "Book created");
+                LogsRepository.AddLogs(_context,0, "Book created");
 
                 bookDto.Id = book.Id;
 
@@ -134,7 +136,7 @@ namespace WebApi.Controllers
                 
                 _context.SaveChanges();
 
-                LogsRepository.AddLogs(0, "Book updated");
+                LogsRepository.AddLogs(_context,0, "Book updated");
                 return Ok(existing);
             }
             catch (Exception ex)
@@ -167,7 +169,7 @@ namespace WebApi.Controllers
 
                 _context.SaveChanges();
 
-                LogsRepository.AddLogs(0, "Book deleted");
+                LogsRepository.AddLogs(_context, 0, "Book deleted");
 
 
                 return Ok();

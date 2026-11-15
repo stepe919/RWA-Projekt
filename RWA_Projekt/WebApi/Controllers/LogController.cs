@@ -1,27 +1,41 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Models;
-using WebApi.Repositories;
+
+
 
 namespace WebApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/logs")]
     [ApiController]
-    public class LogController : Controller
+    public class LogController : ControllerBase
     {
 
-        [HttpGet]
-        public ActionResult<IEnumerable<Log>> Get(int last = 20)
+        private readonly RwaLibraryLearnContext _context;
+
+
+
+        public LogController(RwaLibraryLearnContext context)
+        {
+
+            _context = context;
+        }
+
+        [HttpGet("get/{last}")]
+        public ActionResult<List<Log>> Get(int last)
         {
             try
             {
-                var result = LogsRepository.LogsItems.TakeLast(last);
+                var result = _context.Logs
+                             .OrderByDescending(l=>l.Timestamp)
+                             .Take(last)
+                             .ToList();
 
                 return Ok(result);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(500);
+                return StatusCode(500, ex.Message);
             }
         }
 
@@ -35,7 +49,7 @@ namespace WebApi.Controllers
             try
             {
 
-                return Ok(LogsRepository.LogsItems.Count);
+                return Ok(_context.Logs.Count());
             }
 
 
