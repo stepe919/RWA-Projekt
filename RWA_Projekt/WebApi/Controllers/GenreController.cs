@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 using WebApi.Models;
 using WebApi.Repositories;
@@ -103,10 +104,7 @@ namespace WebApi.Controllers
             try
             {
 
-                if (_context.Books.Any(b => b.GenreId == id))
-                {
-                    return BadRequest($"Žanr ima knjige s tim ide-em pa se ne smije obrisati");
-                }
+             
 
                 var genre = _context.Genres.FirstOrDefault(b => b.Id == id);
                 if ( genre == null)
@@ -115,6 +113,11 @@ namespace WebApi.Controllers
 
                     return NotFound($"Ne postoji genre s id-em {id}");
 
+                }
+
+                if (_context.Books.Any(b => b.GenreId == id))
+                {
+                    return BadRequest($"Žanr ima knjige s tim ide-em pa se ne smije obrisati");
                 }
                 _context.Remove(genre);
                 _context.SaveChanges();

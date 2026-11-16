@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using WebApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using WebApi.Repositories;
+using Microsoft.EntityFrameworkCore;
 using WebApi.Dtos;
 
 namespace WebApi.Controllers
@@ -48,7 +49,7 @@ namespace WebApi.Controllers
 
                 _context.SaveChanges();
 
-                LogsRepository.AddLogs(_context,0, "Book created");
+                LogsRepository.AddLogs(_context, 0, "Book created");
 
                 bookDto.Id = book.Id;
 
@@ -63,12 +64,14 @@ namespace WebApi.Controllers
 
 
         [HttpGet]
-      
+
         public ActionResult<List<Book>> GetAllBooks()
         {
+
+
             try
             {
-                return Ok(_context.Books.ToList());
+                return Ok(_context.Books.Include(b => b.Genre).ToList());
             }
             catch (Exception)
             {
@@ -78,12 +81,18 @@ namespace WebApi.Controllers
 
 
         [HttpGet("{id}")]
-    
-        public ActionResult<Book> GetByIdBook(int id)
+
+        public ActionResult<BookDto> GetByIdBook(int id)
         {
             try
             {
-                var book = _context.Books.FirstOrDefault(b => b.Id == id);
+                var book = _context.Books.Include(b => b.Genre).FirstOrDefault(b => b.Id == id);
+
+
+
+
+
+
 
                 if (book == null)
                 {
@@ -94,10 +103,24 @@ namespace WebApi.Controllers
 
 
 
+                var bookDto = new BookDto
+                {
+                    Id = book.Id,
+                    Name = book.Name,
+                    Author = book.Author,
+                    Isbn = book.Isbn,
+                    Description = book.Description,
+                    PublishedYear = book.PublishedYear,
+                    GenreId = book.GenreId,
+                    GenreName = book.Genre.Name
+
+
+                };
 
 
 
-                return Ok(book);
+
+                return Ok(bookDto);
             }
             catch (Exception ex)
             {
@@ -121,7 +144,7 @@ namespace WebApi.Controllers
                 var existing = _context.Books.FirstOrDefault(b => b.Id == id);
 
 
-             
+
 
 
 
@@ -145,10 +168,10 @@ namespace WebApi.Controllers
                 existing.PublishedYear = bookDto.PublishedYear;
                 existing.Isbn = bookDto.Isbn;
                 existing.GenreId = bookDto.GenreId;
-                
+
                 _context.SaveChanges();
 
-                LogsRepository.AddLogs(_context,0, "Book updated");
+                LogsRepository.AddLogs(_context, 0, "Book updated");
                 return Ok(existing);
             }
             catch (Exception ex)
@@ -193,49 +216,47 @@ namespace WebApi.Controllers
         }
 
         [HttpGet("[action]")]
-  
 
-        public ActionResult<List<Book>> SearchBooks(string? name, int page = 1, int count = 10)
+
+        public ActionResult<List<BookDto>> SearchBooks(string? name, int page = 1, int count = 10)
         {
-
-            IQueryable<Book> results = _context.Books;
-
-
-         
-
             try
             {
 
-
-
+                IQueryable<Book> results = _context.Books.Include(b => b.Genre);
 
                 if (!string.IsNullOrEmpty(name))
                 {
-
                     results = results.Where(b => b.Name.Contains(name));
                 }
 
-                results = results.OrderBy(b => b.Name);
+                results = results.OrderBy(b => b.Name)
+                                 .Skip((page - 1) * count)
+                                 .Take(count);
 
-                results = results.Skip((page - 1) * count).Take(count);
 
-                return Ok(results.ToList());
+                var dtos = results.Select(b => new BookDto
+                {
+                    Id = b.Id,
+                    Name = b.Name,
+                    Author = b.Author,
+                    Isbn = b.Isbn,
+                    Description = b.Description,
+                    PublishedYear = b.PublishedYear,
+                    GenreId = b.GenreId,
+                    GenreName = b.Genre.Name
+                }).ToList();
+
+                return Ok(dtos);
             }
-
-
             catch (Exception ex)
             {
-
-               
-
-
-
-                    return StatusCode(500,ex.Message);
+                return StatusCode(500, ex.Message);
             }
         }
+
+
+
     }
-
-
-
 
 }

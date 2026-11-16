@@ -12,7 +12,7 @@ namespace WebApi.Dtos
 
         [Required(ErrorMessage = "Author is required")]
         [StringLength(256)]
-        public string? Author { get; set; } = null!;
+        public string Author { get; set; } = null!;
 
         [StringLength(256)]
         public string? Isbn { get; set; }
@@ -23,5 +23,6 @@ namespace WebApi.Dtos
 
         [Range(1, int.MaxValue, ErrorMessage = "GenreId is required")]
         public int GenreId { get; set; }
+        public string? GenreName { get; set; }
     }
 }
