@@ -149,6 +149,13 @@ namespace WebApi.Controllers
                     return NotFound($"Ne postoji lokacija s id-em {id}");
 
                 }
+
+
+                if (_context.BookLocations.Any(bl => bl.LocationId == id))
+                {
+                    return BadRequest($"Location with id {id} has books and cannot be deleted");
+                }
+
                 _context.Remove(location);
                 _context.SaveChanges();
 

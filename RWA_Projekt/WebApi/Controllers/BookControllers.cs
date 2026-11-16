@@ -222,6 +222,13 @@ namespace WebApi.Controllers
                     return NotFound($"Ne postoji knjiga s id-em {id}");
 
                 }
+
+
+
+                var links = _context.BookLocations.Where(bl => bl.BookId == id);
+                _context.RemoveRange(links);
+
+
                 _context.Remove(book);
 
                 _context.SaveChanges();
