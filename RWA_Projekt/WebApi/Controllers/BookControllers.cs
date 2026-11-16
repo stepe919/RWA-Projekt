@@ -1,10 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WebApi.Models;
-using Microsoft.AspNetCore.Authorization;
-using WebApi.Repositories;
 using Microsoft.EntityFrameworkCore;
 using WebApi.Dtos;
+using WebApi.Models;
+using WebApi.Repositories;
 
 namespace WebApi.Controllers
 {
@@ -65,13 +64,36 @@ namespace WebApi.Controllers
 
         [HttpGet]
 
-        public ActionResult<List<Book>> GetAllBooks()
+        public ActionResult<List<BookDto>> GetAllBooks()
         {
+
+
+            IQueryable<Book> results = _context.Books.Include(b => b.Genre);
+
+   
+
+      
+
 
 
             try
             {
-                return Ok(_context.Books.Include(b => b.Genre).ToList());
+
+
+                var dtos = results.Select(b => new BookDto
+                {
+                    Id = b.Id,
+                    Name = b.Name,
+                    Author = b.Author,
+                    Isbn = b.Isbn,
+                    Description = b.Description,
+                    PublishedYear = b.PublishedYear,
+                    GenreId = b.GenreId,
+                    GenreName = b.Genre.Name
+                }).ToList();
+
+
+                return Ok(dtos);
             }
             catch (Exception)
             {
